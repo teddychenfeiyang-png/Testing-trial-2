@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>River Sands Area Noise Monitoring Assessment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <style>
+        @media print {
+            body {
+                margin: 20mm 10mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .chart-container {
+                page-break-inside: avoid;
+                min-height: 450px;
+            }
+            .header {
+                padding: 40px !important;
+            }
+            .main-content {
+                padding: 0 40px !important;
+            }
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            background: #f0f4f8;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+            color: white;
+            padding: 20px 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #00a8e6;
+        }
+        
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: clamp(20px, 5vw, 32px);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+        
+        .header .subtitle {
+            color: #cce5ff;
+            margin-top: 8px;
+            font-size: clamp(13px, 3.5vw, 16px);
+        }
+        
+        .header .reference {
+            color: #99ccff;
+            margin-top: 5px;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        
+        .main-content {
+            padding: 0 15px 20px 15px;
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                max-width: 210mm;
+                margin: 0 auto;
+                padding: 20px 0;
+            }
+            
+            .header {
+                padding: 40px;
+                margin-bottom: 30px;
+            }
+            
+            .main-content {
+                padding: 0 40px 40px 40px;
+            }
+        }
+        
+        .limitations-box {
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        
+        .limitations-box h3 {
+            margin-top: 0;
+            color: #c53030;
+            display: flex;
+            align-items: center;
+            font-size: clamp(16px, 4vw, 18px);
+        }
+        
+        .limitations-box h3::before {
+            content: "⚠";
+            margin-right: 10px;
+            font-size: clamp(20px, 5vw, 24px);
+            flex-shrink: 0;
+        }
+        
+        .limitations-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .limitations-box li {
+            margin-bottom: 8px;
+            font-size: clamp(13px, 3.5vw, 14px);
+        }
+        
+        .info-box {
+            background: white;
+            border-left: 5px solid #0066cc;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            color: #004499;
+            font-size: clamp(16px, 4vw, 18px);
+        }
+        
+        .info-box p, .info-box ul {
+            font-size: clamp(13px, 3.5vw, 14px);
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px 10px 30px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin: 20px 0;
+            position: relative;
+            min-height: 300px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                padding: 30px 25px 40px 25px;
+                margin: 35px 0;
+                min-height: 450px;
+            }
+        }
+        
+        .chart-title {
+            font-size: clamp(15px, 4vw, 18px);
+            font-weight: 600;
+            color: #004499;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            page-break-after: avoid;
+            break-after: avoid;
+            padding: 0 10px;
+            line-height: 1.4;
+        }
+        
+        .chart-container canvas {
+            max-height: 350px !important;
+            width: 100% !important;
+            height: auto !important;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container canvas {
+                max-height: 450px !important;
+            }
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        @media (min-width: 768px) {
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin: 30px 0;
+            }
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            text-align: center;
+            border-top: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        @media (min-width: 768px) {
+            .summary-card {
+                padding: 25px;
+            }
+            
+            .summary-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+            }
+        }
+        
+        .summary-card.critical {
+            border-top-color: #dc2626;
+            background: linear-gradient(to bottom, #fef2f2 0%, white 30%);
+        }
+        
+        .summary-card.high {
+            border-top-color: #f59e0b;
+            background: linear-gradient(to bottom, #fffbeb 0%, white 30%);
+        }
+        
+        .summary-card.moderate {
+            border-top-color: #3b82f6;
+            background: linear-gradient(to bottom, #eff6ff 0%, white 30%);
+        }
+        
+        .summary-card.low {
+            border-top-color: #10b981;
+            background: linear-gradient(to bottom, #f0fdf4 0%, white 30%);
+        }
+        
+        .summary-card h4 {
+            margin: 0 0 8px 0;
+            color: #374151;
+            font-size: clamp(11px, 3vw, 13px);
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .summary-value {
+            font-size: clamp(32px, 8vw, 48px);
+            font-weight: 700;
+            color: #1f2937;
+            margin: 8px 0 5px 0;
+            line-height: 1;
+        }
+        
+        .summary-label {
+            font-size: clamp(11px, 3vw, 13px);
+            color: #4b5563;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 20px -15px;
+            padding: 0 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .table-wrapper {
+                margin: 30px 0;
+                padding: 0;
+            }
+        }
+        
+        .data-table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .data-table th {
+            background: #0066cc;
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: clamp(11px, 2.5vw, 13px);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .level-critical {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .level-high {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .level-moderate {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .level-low {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .freq-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .freq-low { background: #e0e7ff; color: #3730a3; }
+        .freq-mid { background: #fef3c7; color: #92400e; }
+        .freq-high { background: #fee2e2; color: #991b1b; }
+        
+        h2 {
+            font-size: clamp(20px, 5vw, 24px);
+            color: #004499;
+            margin: 30px 0 15px 0;
+            border-bottom: 3px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-size: clamp(16px, 4vw, 18px);
+            color: #374151;
+            margin: 20px 0 12px 0;
+        }
+        
+        p {
+            font-size: clamp(13px, 3.5vw, 14px);
+            line-height: 1.6;
+            margin: 12px 0;
+        }
+        
+        ul {
+            padding-left: 25px;
+        }
+        
+        li {
+            font-size: clamp(13px, 3.5vw, 14px);
+            margin-bottom: 8px;
+        }
+        
+        strong {
+            color: #1f2937;
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 767px) {
+            .chart-container {
+                touch-action: pan-y;
+            }
+            
+            /* Ensure charts are scrollable on mobile if needed */
+            .chart-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        /* Touch-friendly spacing */
+        @media (hover: none) and (pointer: coarse) {
+            .summary-card {
+                min-height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>River Sands Area Noise Monitoring Assessment</h1>
+        <div class="subtitle">Workplace Exposure Limit Assessment</div>
+        <div class="reference">Reference: RS-NOISE-2024-001 | Date: 15 October 2024</div>
+    </div>
+
+    <div class="main-content">
+        <div class="limitations-box">
+            <h3>Assessment Limitations</h3>
+            <ul>
+                <li><strong>Snapshot measurement:</strong> Results represent specific dates and conditions only</li>
+                <li><strong>Not audiometric:</strong> Does not replace hearing surveillance requirements</li>
+                <li><strong>Task variation:</strong> Actual exposure may vary with different operational activities</li>
+                <li><strong>Environmental factors:</strong> Weather and equipment conditions may affect results</li>
+                <li><strong>WEL compliance:</strong> Exceeding 85 dB(A) LAeq,8h triggers mandatory controls under WHS Regulation 2011</li>
+            </ul>
+        </div>
+
+        <h2>Executive Summary</h2>
+        
+        <div class="summary-grid">
+            <div class="summary-card critical">
+                <h4>Critical Areas</h4>
+                <div class="summary-value">3</div>
+                <div class="summary-label">Locations exceeding<br>90 dB(A)</div>
+            </div>
+            
+            <div class="summary-card high">
+                <h4>High Risk</h4>
+                <div class="summary-value">5</div>
+                <div class="summary-label">Locations 85-90 dB(A)<br>WEL exceeded</div>
+            </div>
+            
+            <div class="summary-card moderate">
+                <h4>Moderate Risk</h4>
+                <div class="summary-value">12</div>
+                <div class="summary-label">Locations 80-85 dB(A)<br>Below WEL</div>
+            </div>
+            
+            <div class="summary-card low">
+                <h4>Low Risk</h4>
+                <div class="summary-value">0</div>
+                <div class="summary-label">Locations below<br>80 dB(A)</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>Key Findings</h3>
+            <p><strong>Dispatch area forklift operators</strong> experience the highest noise exposure (89-91 dB(A) LAeq,8h), consistently exceeding the 85 dB(A) workplace exposure limit (WEL) established under the Work Health and Safety Regulation 2011 (Qld).</p>
+            <p><strong>Concetti area operations</strong> show elevated noise levels (86-87 dB(A)), with forklift operators marginally exceeding WEL requirements.</p>
+            <p><strong>Bagging Plant 2 operations</strong> remain just below WEL thresholds (84 dB(A)) but require ongoing monitoring due to proximity to the exposure limit.</p>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>Area Noise Level Comparison</h2>
+        <div class="chart-container">
+            <div class="chart-title">Average Noise Exposure by Work Area (LAeq,8h)</div>
+            <canvas id="areaChart"></canvas>
+        </div>
+
+        <h2>Compliance Status</h2>
+        <div class="chart-container">
+            <div class="chart-title">Number of Locations by Risk Category</div>
+            <canvas id="complianceChart"></canvas>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>Time-Based Noise Analysis</h2>
+        <div class="chart-container">
+            <div class="chart-title">Noise Exposure Trends Over Assessment Period</div>
+            <canvas id="timeChart"></canvas>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>Forklift Operator Personal Exposure</h2>
+        <div class="chart-container">
+            <div class="chart-title">Individual Forklift Operator LAeq,8h Measurements</div>
+            <canvas id="forkliftChart"></canvas>
+        </div>
+
+        <div class="info-box">
+            <h3>Forklift Operator Findings</h3>
+            <p><strong>All five forklift operators</strong> monitored across the facility exceeded the 85 dB(A) LAeq,8h workplace exposure limit:</p>
+            <ul>
+                <li><strong>Dispatch area operators:</strong> Highest exposures recorded (89-91 dB(A)), requiring immediate implementation of enhanced hearing protection and engineering controls</li>
+                <li><strong>Concetti area operators:</strong> Moderate exceedances (86-87 dB(A)), warranting review of cabin acoustic insulation and operational procedures</li>
+                <li><strong>BP2 area operator:</strong> Marginally exceeded WEL (86 dB(A)), close to control threshold</li>
+            </ul>
+            <p><strong>Regulatory implication:</strong> Under WHS Regulation 2011 s 56-58, PCBUs must eliminate or minimise noise exposure through engineering controls, administrative measures, and provision of appropriate personal protective equipment (PPE) where noise exceeds 85 dB(A) LAeq,8h.</p>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>Detailed Measurement Data</h2>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>LAeq,8h dB(A)</th>
+                        <th>Risk Level</th>
+                        <th>LCpeak dB(C)</th>
+                        <th>Dominant Frequency (Hz)</th>
+                        <th>Frequency Range</th>
+                    </tr>
+                </thead>
+                <tbody id="areaTableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Recommendations</h2>
+        
+        <div class="info-box">
+            <h3>Immediate Actions Required (Critical & High Risk Areas)</h3>
+            <ul>
+                <li><strong>Hearing protection mandatory:</strong> Enforce Class 4 or Class 5 hearing protection for all workers in Dispatch and Concetti areas (AS/NZS 1270:2023)</li>
+                <li><strong>Audiometric testing:</strong> Establish baseline and periodic hearing assessments for exposed workers per WHS Regulation 2011 s 58</li>
+                <li><strong>Engineering controls:</strong> Investigate forklift cabin acoustic improvements, equipment maintenance schedules, and source noise reduction</li>
+                <li><strong>Administrative controls:</strong> Implement job rotation to reduce individual exposure duration where practicable</li>
+                <li><strong>Signage and demarcation:</strong> Establish hearing protection zones with appropriate signage per AS 1319:1994</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>Medium-Term Actions (Moderate Risk Areas)</h3>
+            <ul>
+                <li><strong>Ongoing monitoring:</strong> Quarterly noise assessments in BP2 and peripheral areas to identify trends</li>
+                <li><strong>Hearing protection availability:</strong> Ensure adequate supply and fit-testing of hearing protection for all workers</li>
+                <li><strong>Training and awareness:</strong> Conduct noise hazard awareness training covering recognition, health effects, and control measures</li>
+                <li><strong>Maintenance programme:</strong> Implement preventative maintenance targeting noisy equipment and worn components</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>Regulatory Compliance Framework</h3>
+            <p>This assessment has been conducted in accordance with:</p>
+            <ul>
+                <li><strong>Work Health and Safety Regulation 2011 (Qld)</strong> – Sections 56-58 (Noise management)</li>
+                <li><strong>AS/NZS 1269.1:2005</strong> – Occupational noise management - Measurement and assessment of noise immission and exposure</li>
+                <li><strong>AS/NZS 1270:2023</strong> – Acoustics - Hearing protectors</li>
+                <li><strong>Workplace exposure standard:</strong> 85 dB(A) LAeq,8h as per Safe Work Australia guidance</li>
+            </ul>
+        </div>
+
+        <div class="info-box" style="margin-top: 30px; border-left-color: #6b7280;">
+            <h3>Assessment Methodology</h3>
+            <p><strong>Instrumentation:</strong> Type 1 integrating sound level meters calibrated to AS IEC 61672.1:2019</p>
+            <p><strong>Measurement approach:</strong> Area monitoring conducted at representative worker positions during typical operational periods. Personal dosimetry conducted for forklift operators over full 8-hour shifts.</p>
+            <p><strong>Assessment period:</strong> 14-15 October 2024 during normal production operations</p>
+            <p><strong>Assessor:</strong> SafetySure Pty Ltd | AIOH Certified Occupational Hygienist</p>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced color scheme
+        const colours = {
+            critical: 'rgba(220, 38, 38, 0.8)',
+            criticalBorder: 'rgba(220, 38, 38, 1)',
+            high: 'rgba(245, 158, 11, 0.8)',
+            highBorder: 'rgba(245, 158, 11, 1)',
+            moderate: 'rgba(59, 130, 246, 0.8)',
+            moderateBorder: 'rgba(59, 130, 246, 1)',
+            low: 'rgba(16, 185, 129, 0.8)',
+            lowBorder: 'rgba(16, 185, 129, 1)'
+        };
+
+        // Data
+        const areaData = [
+            { date: "14-Oct", location: "Dispatch - Forklift 1", LAeq: 91, peak: 118, frequency: 500 },
+            { date: "14-Oct", location: "Dispatch - Forklift 2", LAeq: 89, peak: 116, frequency: 630 },
+            { date: "14-Oct", location: "Dispatch - Ground Level", LAeq: 88, peak: 115, frequency: 800 },
+            { date: "14-Oct", location: "Concetti - Forklift 3", LAeq: 87, peak: 114, frequency: 1000 },
+            { date: "14-Oct", location: "Concetti - Forklift 4", LAeq: 86, peak: 113, frequency: 1250 },
+            { date: "14-Oct", location: "Concetti - Operator Station", LAeq: 86, peak: 112, frequency: 800 },
+            { date: "14-Oct", location: "Concetti - Packing Line", LAeq: 85, peak: 111, frequency: 1600 },
+            { date: "15-Oct", location: "BP2 - Forklift 5", LAeq: 86, peak: 113, frequency: 800 },
+            { date: "15-Oct", location: "BP2 - Bagging Machine", LAeq: 84, peak: 110, frequency: 2000 },
+            { date: "15-Oct", location: "BP2 - Operator Platform", LAeq: 83, peak: 109, frequency: 1600 },
+            { date: "15-Oct", location: "BP2 - Ground Level", LAeq: 82, peak: 108, frequency: 1000 },
+            { date: "15-Oct", location: "Warehouse - Central", LAeq: 82, peak: 107, frequency: 500 },
+            { date: "15-Oct", location: "Warehouse - Loading Bay", LAeq: 83, peak: 108, frequency: 630 },
+            { date: "15-Oct", location: "Maintenance Workshop", LAeq: 84, peak: 112, frequency: 2500 },
+            { date: "15-Oct", location: "Silo Area - Ground Level", LAeq: 82, peak: 106, frequency: 315 },
+            { date: "15-Oct", location: "Silo Area - Platform", LAeq: 83, peak: 107, frequency: 400 },
+            { date: "15-Oct", location: "Admin Block Exterior", LAeq: 81, peak: 105, frequency: 250 },
+            { date: "15-Oct", location: "Truck Receival Bay", LAeq: 82, peak: 110, frequency: 500 },
+            { date: "15-Oct", location: "Raw Material Storage", LAeq: 81, peak: 106, frequency: 400 },
+            { date: "15-Oct", location: "Equipment Yard", LAeq: 80, peak: 108, frequency: 800 }
+        ];
+
+        const forkliftData = [
+            { area: "Dispatch", workers: ["Forklift 1", "Forklift 2"], exposures: [91, 89] },
+            { area: "Concetti", workers: ["Forklift 3", "Forklift 4"], exposures: [87, 86] },
+            { area: "BP2", workers: ["Forklift 5"], exposures: [86] }
+        ];
+
+        // Helper function to draw reference lines
+        function drawReferenceLabel(ctx, chart, y, text, offset) {
+            ctx.save();
+            ctx.fillStyle = '#dc2626';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText(text, chart.chartArea.right - offset, y - 5);
+            ctx.restore();
+        }
+
+        // Chart 1: Area comparison
+        const ctx1 = document.getElementById('areaChart').getContext('2d');
+        const areaAverages = {
+            'Dispatch': [],
+            'Concetti': [],
+            'BP2': [],
+            'Warehouse': [],
+            'Other': []
+        };
+
+        areaData.forEach(d => {
+            if (d.location.includes('Dispatch')) areaAverages['Dispatch'].push(d.LAeq);
+            else if (d.location.includes('Concetti')) areaAverages['Concetti'].push(d.LAeq);
+            else if (d.location.includes('BP2')) areaAverages['BP2'].push(d.LAeq);
+            else if (d.location.includes('Warehouse')) areaAverages['Warehouse'].push(d.LAeq);
+            else areaAverages['Other'].push(d.LAeq);
+        });
+
+        const areaLabels = Object.keys(areaAverages);
+        const areaValues = areaLabels.map(area => {
+            const values = areaAverages[area];
+            return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        });
+
+        const areaColors = areaValues.map(val => {
+            if (val > 90) return colours.critical;
+            if (val > 85) return colours.high;
+            if (val > 80) return colours.moderate;
+            return colours.low;
+        });
+
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: areaLabels,
+                datasets: [{
+                    label: 'Average LAeq,8h',
+                    data: areaValues,
+                    backgroundColor: areaColors,
+                    borderColor: areaColors.map(c => c.replace('0.8', '1')),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 20, right: 20, bottom: 10, left: 10 }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'LAeq,8h: ' + context.parsed.y.toFixed(1) + ' dB(A)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 75,
+                        max: 95,
+                        title: {
+                            display: true,
+                            text: 'LAeq,8h dB(A)',
+                            font: { size: 14, weight: 'bold' },
+                            padding: { top: 10, bottom: 10 }
+                        },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12 } }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Work Area',
+                            font: { size: 14, weight: 'bold' },
+                            padding: { top: 10, bottom: 0 }
+                        },
+                        ticks: { font: { size: 11 } }
+                    }
+                }
+            },
+            plugins: [{
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const yScale = chart.scales.y;
+                    
+                    // Draw WEL line
+                    const y85 = yScale.getPixelForValue(85);
+                    ctx.save();
+                    ctx.strokeStyle = '#dc2626';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(chart.chartArea.left, y85);
+                    ctx.lineTo(chart.chartArea.right, y85);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                    
+                    // Draw WEL label
+                    drawReferenceLabel(ctx, chart, y85, 'WEL = 85 dB(A)', 10);
+                    
+                    // Draw 90 dB line
+                    const y90 = yScale.getPixelForValue(90);
+                    ctx.save();
+                    ctx.strokeStyle = '#b91c1c';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([10, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(chart.chartArea.left, y90);
+                    ctx.lineTo(chart.chartArea.right, y90);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                    
+                    // Draw 90 dB label
+                    drawReferenceLabel(ctx, chart, y90, 'Critical = 90 dB(A)', 10);
+                }
+            }]
+        });
+
+        // Chart 2: Compliance status
+        const ctx2 = document.getElementById('complianceChart').getContext('2d');
+        const complianceCounts = {
+            'Critical (>90)': 0,
+            'High (85-90)': 0,
+            'Moderate (80-85)': 0,
+            'Low (<80)': 0
+        };
+
+        areaData.forEach(d => {
+            if (d.LAeq > 90) complianceCounts['Critical (>90)']++;
+            else if (d.LAeq > 85) complianceCounts['High (85-90)']++;
+            else if (d.LAeq > 80) complianceCounts['Moderate (80-85)']++;
+            else complianceCounts['Low (<80)']++;
+        });
+
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(complianceCounts),
+                datasets: [{
+                    data: Object.values(complianceCounts),
+                    backgroundColor: [colours.critical, colours.high, colours.moderate, colours.low],
+                    borderColor: [colours.criticalBorder, colours.highBorder, colours.moderateBorder, colours.lowBorder],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 20, right: 20, bottom: 20, left: 20 }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12 },
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => ({
+                                    text: label + ': ' + data.datasets[0].data[i] + ' locations',
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    strokeStyle: data.datasets[0].borderColor[i],
+                                    lineWidth: 2,
+                                    hidden: false,
+                                    index: i
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Time-based analysis
+        const ctx3 = document.getElementById('timeChart').getContext('2d');
+        const dateGroups = {};
+        areaData.forEach(d => {
+            if (!dateGroups[d.date]) dateGroups[d.date] = [];
+            dateGroups[d.date].push(d.LAeq);
+        });
+
+        const timeLabels = Object.keys(dateGroups);
+        const timeData = {
+            max: timeLabels.map(date => Math.max(...dateGroups[date])),
+            avg: timeLabels.map(date => {
+                const values = dateGroups[date];
+                return values.reduce((a, b) => a + b, 0) / values.length;
+            }),
+            min: timeLabels.map(date => Math.min(...dateGroups[date]))
+        };
+
+        new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [
+                    {
+                        label: 'Maximum',
+                        data: timeData.max,
+                        borderColor: colours.criticalBorder,
+                        backgroundColor: colours.critical,
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    },
+                    {
+                        label: 'Average',
+                        data: timeData.avg,
+                        borderColor: colours.moderateBorder,
+                        backgroundColor: colours.moderate,
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    },
+                    {
+                        label: 'Minimum',
+                        data: timeData.min,
+                        borderColor: colours.lowBorder,
+                        backgroundColor: colours.low,
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 20, right: 20, bottom: 10, left: 10 }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { padding: 15, font: { size: 12 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' dB(A)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 75,
+                        max: 95,
+                        title: {
+                            display: true,
+                            text: 'LAeq,8h dB(A)',
+                            font: { size: 14, weight: 'bold' },
+                            padding: { top: 10, bottom: 10 }
+                        },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12 } }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Assessment Date',
+                            font: { size: 14, weight: 'bold' },
+                            padding: { top: 10, bottom: 0 }
+                        },
+                        ticks: { font: { size: 11 } }
+                    }
+                }
+            },
+            plugins: [{
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const yScale = chart.scales.y;
+                    
+                    const y85 = yScale.getPixelForValue(85);
+                    ctx.save();
+                    ctx.strokeStyle = '#dc2626';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(chart.chartArea.left, y85);
+                    ctx.lineTo(chart.chartArea.right, y85);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                    
+                    drawReferenceLabel(ctx, chart, y85, 'WEL = 85 dB(A)', 10);
+                }
+            }]
+        });
+
+        // Chart 4: Forklift operator comparison
+        const ctx4 = document.getElementById('forkliftChart').getContext('2d');
+        
+        const forkliftChartData = [];
+        const forkliftLabels = [];
+        const forkliftColors = [];
+        
+        forkliftData.forEach(area => {
+            area.workers.forEach((worker, index) => {
+                forkliftLabels.push(worker);
+                forkliftChartData.push(area.exposures[index]);
+                
+                if (area.area === "Dispatch") {
+                    forkliftColors.push(colours.critical);
+                } else if (area.area === "Concetti") {
+                    forkliftColors.push(colours.high);
+                } else {
+                    forkliftColors.push(colours.moderate);
+                }
+            });
+        });
+        
+        new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: forkliftLabels,
+                datasets: [{
+                    label: 'Personal Exposure',
+                    data: forkliftChartData,
+                    backgroundColor: forkliftColors,
+                    borderColor: forkliftColors.map(c => c.replace('0.8', '1')),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 20, right: 20, bottom: 10, left: 10 }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const index = context[0].dataIndex;
+                                let area = '';
+                                let runningIndex = 0;
+                                for (let i = 0; i < forkliftData.length; i++) {
+                                    if (index < runningIndex + forkliftData[i].workers.length) {
+                                        area = forkliftData[i].area;
+                                        break;
+                                    }
+                                    runningIndex += forkliftData[i].workers.length;
+                                }
+                                return area + ' Forklift: ' + forkliftLabels[index];
+                            },
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                const status = value > 85 ? ' (Exceeds WEL)' : ' (Below WEL)';
+                                return 'LAeq,8h: ' + value + ' dB(A)' + status;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 80,
+                        max: 92,
+                        title: {
+                            display: true,
+                            text: 'LAeq,8h dB(A)',
+                            font: { size: 14, weight: 'bold' },
+                            padding: { top: 10, bottom: 10 }
+                        },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12 } }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Forklift Operator',
+                            font: { size: 14, weight: 'bold' },
+                            padding: { top: 10, bottom: 0 }
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 11 }
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const yScale = chart.scales.y;
+                    const xScale = chart.scales.x;
+                    
+                    // Draw WEL line
+                    const y = yScale.getPixelForValue(85);
+                    ctx.save();
+                    ctx.strokeStyle = '#dc2626';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(chart.chartArea.left, y);
+                    ctx.lineTo(chart.chartArea.right, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                    
+                    drawReferenceLabel(ctx, chart, y, 'WEL = 85 dB(A)', 10);
+                    
+                    // Draw area labels on larger screens only
+                    if (window.innerWidth >= 768) {
+                        ctx.save();
+                        ctx.font = 'bold 11px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#374151';
+                        
+                        const dispatchX = (xScale.getPixelForValue(0) + xScale.getPixelForValue(1)) / 2;
+                        ctx.fillText('DISPATCH', dispatchX, chart.chartArea.bottom - 25);
+                        
+                        const concettiX = (xScale.getPixelForValue(2) + xScale.getPixelForValue(3)) / 2;
+                        ctx.fillText('CONCETTI', concettiX, chart.chartArea.bottom - 25);
+                        
+                        const bp2X = xScale.getPixelForValue(4);
+                        ctx.fillText('BP2', bp2X, chart.chartArea.bottom - 25);
+                        
+                        ctx.restore();
+                    }
+                }
+            }]
+        });
+
+        // Populate area table
+        const tableBody = document.getElementById('areaTableBody');
+        areaData.forEach(d => {
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerHTML = d.date;
+            row.insertCell(1).innerHTML = d.location;
+            row.insertCell(2).innerHTML = `<strong>${d.LAeq}</strong>`;
+            
+            const levelCell = row.insertCell(3);
+            if (d.LAeq > 90) {
+                levelCell.innerHTML = '<span class="level-critical">Critical</span>';
+            } else if (d.LAeq > 85) {
+                levelCell.innerHTML = '<span class="level-high">High</span>';
+            } else if (d.LAeq > 80) {
+                levelCell.innerHTML = '<span class="level-moderate">Moderate</span>';
+            } else {
+                levelCell.innerHTML = '<span class="level-low">Low</span>';
+            }
+            
+            row.insertCell(4).innerHTML = d.peak;
+            row.insertCell(5).innerHTML = d.frequency;
+            
+            const freqRange = row.insertCell(6);
+            if (d.frequency < 250) {
+                freqRange.innerHTML = '<span class="freq-badge freq-low">Low</span>';
+            } else if (d.frequency <= 2000) {
+                freqRange.innerHTML = '<span class="freq-badge freq-mid">Mid</span>';
+            } else {
+                freqRange.innerHTML = '<span class="freq-badge freq-high">High</span>';
+            }
+        });
+    </script>
+</body>
+</html>
